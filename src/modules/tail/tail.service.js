@@ -67,7 +67,6 @@ class Tail extends EventEmitter {
                             this.#queue.push(log.trim().replace(/\n|\r/g, ""));
                         })
                     }
-                    log(this.#queue);
                     this.emit('new-logs', this.#queue);
                 }
             })

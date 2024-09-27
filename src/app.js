@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 
 const http = require('http').Server(app);
 const socketio = require('socket.io')(http);
@@ -8,7 +9,7 @@ const { setupRoutes } = require('./modules');
 
 app.use('/', setupRoutes());
 
-const LOG_FILE_PATH = './logs/server.log';
+const LOG_FILE_PATH = path.join(__dirname, './logs/server.log');
 
 const Tail = require('./modules/tail/tail.service');
 const tail = new Tail(LOG_FILE_PATH);

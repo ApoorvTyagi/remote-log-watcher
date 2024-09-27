@@ -8,5 +8,3 @@
 03/22 08:51:06 INFO   :...read_physical_netif: index #6, interface LOOPBACK has address 127.0.0.1, ifidx 0
 03/22 08:51:06 INFO   :....mailslot_create: creating mailslot for timer
 03/22 08:51:06 INFO   :...mailbox_register: mailbox allocated for timer
-03/23 08:51:07 INFO   :...Test
-03/23 08:51:08 INFO   :...Test1
