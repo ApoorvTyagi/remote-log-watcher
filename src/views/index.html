@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Logs</title>
+  </head>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    let socket = io("ws://localhost:3000")
+    socket.on('new-connection', function(logs) {
+        console.log(logs);
+        for(let log of logs) document.getElementById('content').innerHTML += '<p>' + log + '</br></p>';
+    })
+    socket.on('new-logs', function(logs) {
+        console.log(logs);
+        document.getElementById('content').innerHTML = '<p></p>'
+        for(let log of logs) document.getElementById('content').innerHTML += '<p>' + log + '</br></p>';
+    })
+  </script>
+  <body>
+    <div id = "content"></div>
+  </body>
+</html>
