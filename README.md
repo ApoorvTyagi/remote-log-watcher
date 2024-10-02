@@ -1,7 +1,7 @@
 # remote-log-watcher
 
 ## Description
-`remote-log-watcher` is a real-time log monitoring solution. It streams updates from a remote append-only log file to a web-based client. The client receives real-time updates without a page refresh, only displaying the last 10 lines of the log when first loaded. The server handles multiple clients and only streams new updates as they occur, without retransmitting the entire log file.
+`remote-log-watcher` is a real-time log monitoring solution (Replica of [tail](https://www.linuxtoday.com/developer/linux-tail-command/#:~:text=The%20tail%20command%20displays%20the,with%20other%20tools%20like%20grep.) command of linux). It streams updates from a remote append-only log file to a web-based client. The client receives real-time updates without a page refresh, only displaying the last 10 lines of the log when first loaded. The server handles multiple clients and only streams new updates as they occur, without retransmitting the entire log file.
 
 ## Features
 - **Real-time log streaming:** Updates are pushed to the client in real-time as the log file grows.

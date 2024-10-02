@@ -1,79 +1,78 @@
 const fs = require('fs');
 const { EventEmitter } = require('events');
 
-const buffer = new Buffer.alloc(1024);
+const readBuffer = new Buffer.alloc(1024);
 
-// Configurations
-const NO_OF_LINES = process.env.NO_OF_LINES;
+// Configuration
+const MAX_LOG_LINES = process.env.MAX_LOG_LINES;
 
 class Tail extends EventEmitter {
     #logFile
     #queue
-    constructor(logFile) {
+
+    constructor(filePath) {
         super();
-        this.#logFile = logFile;
-        this.#queue = [] // To store last 10 logs
+        this.#logFile = filePath;
+        this.#queue = []; // To store last 10 logs
     }
 
     bootstrap() {
-        fs.open(this.#logFile, (err, fd) => {
-            if (err) throw new Error('Error in opening file', err);
+        fs.open(this.#logFile, (err, fileDescriptor) => {
+            if (err) throw new Error('Failed to open file', err);
 
-            fs.read(fd, buffer, 0, buffer.length, 0, (err, bytes) => {
-                if (err) throw new Error('Error in reading file', err);
+            fs.read(fileDescriptor, readBuffer, 0, readBuffer.length, 0, (err, bytesRead) => {
+                if (err) throw new Error('Failed to read file', err);
 
-                if (bytes > 0) {                   
-                    const data = buffer.slice(0, bytes).toString();
-                    const logs = data.split('\n');
+                if (bytesRead > 0) {                   
+                    const content = readBuffer.slice(0, bytesRead).toString();
+                    const logEntries = content.split('\n');
 
                     this.#queue = [];
-                    for(let index = (NO_OF_LINES * -1); index < 0; index++) { // O(1) complexity
-                        const log = logs.at(index);
-                        this.#queue.push(log.trim().replace(/\n|\r/g, ""));
+                    for (let index = (NO_OF_LINES * -1); index < 0; index++) { // O(1) complexity
+                        const log = logEntries.at(index);
+                        this.#queue.push(log);
                     }
-                    // logs.slice(-10).forEach(log => this.#queue.push(log));
                 }
-            })
+            });
 
-            fs.watchFile(this.#logFile, {'interval': 500}, (curr, prev) => {
-                this.monitor(curr, prev);
-            })
-        })
-    };
+            fs.watchFile(this.#logFile, {'interval': 500}, (current, previous) => {
+                this.monitorFile(current, previous);
+            });
+        });
+    }
 
-    monitor(curr, prev) {
-        fs.open(this.#logFile, (err, fd) => {
-            if (err) throw new Error('Error in opening file', err);
+    monitorFile(_current, previous) {
+        fs.open(this.#logFile, (err, fileDescriptor) => {
+            if (err) throw new Error('Failed to open file', err);
 
-            fs.read(fd, buffer, 0, buffer.length, prev.size, (err, bytes) => {
-                if (err) throw new Error('Error in reading file', err);
+            fs.read(fileDescriptor, readBuffer, 0, readBuffer.length, previous.size, (err, bytesRead) => {
+                if (err) throw new Error('Failed to read file', err);
 
-                if (bytes > 0) {
-                    const data = buffer.slice(0, bytes).toString();
-                    const logs = data.split('\n');
+                if (bytesRead > 0) {
+                    const content = readBuffer.slice(0, bytesRead).toString();
+                    const newEntries = content.split('\n');
 
-                    if (logs.length >= NO_OF_LINES) {
+                    if (newEntries.length >= MAX_LOG_LINES) {
                         this.#queue = [];
-                        for(let index = (NO_OF_LINES * -1); index < 0; index++) { // O(1) complexity
-                            const log = logs.at(index);
-                            this.#queue.push(log.trim().replace(/\n|\r/g, ""));
+                        for (let index = (NO_OF_LINES * -1); index < 0; index++) { // O(1) complexity
+                            const log = newEntries.at(index);
+                            this.#queue.push(log);
                         }
-                        // logs.slice(-10).forEach((log) => this.#queue.push(log));
                     } else {
-                        logs.forEach((log) => {
-                            if(this.#queue.length >= NO_OF_LINES) {
+                        newEntries.forEach((log) => {
+                            if (this.#queue.length >= MAX_LOG_LINES) {
                                 this.#queue.shift();
                             }
-                            this.#queue.push(log.trim().replace(/\n|\r/g, ""));
-                        })
+                            this.#queue.push(log);
+                        });
                     }
                     this.emit('new-logs', this.#queue);
                 }
-            })
-        })
-    };
+            });
+        });
+    }
 
-    getLatestData() {
+    getLatestLogs() {
         return this.#queue;
     }
 }

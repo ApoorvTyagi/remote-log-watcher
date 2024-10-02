@@ -17,13 +17,12 @@ tail.bootstrap();
 
 
 socketio.on('connection', (socket) => {
-    console.log('New connection established');
+    console.log('New connection established', socket.id);
     tail.on('new-logs', (data) => {
         socket.emit('new-logs', data);
     })
-
     // new connection
-    const latestData = tail.getLatestData();
+    const latestData = tail.getLatestLogs();
     socket.emit('new-connection', latestData);
 });
 
